@@ -14,10 +14,10 @@ import qualified Text.Megaparsec.Char as P
 import qualified Text.Megaparsec.Char.Lexer as L
 
 main :: IO ()
-main = interact $ show . (part1 &&& part2) . map parse . lines
+main = interact $ show . (puzzle1 &&& puzzle2) . map parse . lines
 
-part1 :: [Game] -> Int
-part1 = sum . mapMaybe possible
+puzzle1 :: [Game] -> Int
+puzzle1 = sum . mapMaybe possible
 
 data Game = Game !Int (NE.NonEmpty (Pull Int))
 
@@ -77,8 +77,8 @@ parse =
 
 -----
 
-part2 :: [Game] -> Int
-part2 = sum . map gamePower
+puzzle2 :: [Game] -> Int
+puzzle2 = sum . map gamePower
 
 gamePower :: Game -> Int
 gamePower (Game _ident pulls) =

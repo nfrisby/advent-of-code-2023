@@ -8,10 +8,10 @@ import           Data.List (isPrefixOf)
 import qualified Data.Semigroup as Semi
 
 main :: IO ()
-main = interact $ show . (part1 &&& part2) . lines
+main = interact $ show . (puzzle1 &&& puzzle2) . lines
 
-part1 :: [String] -> Int
-part1 = sum . map decode
+puzzle1 :: [String] -> Int
+puzzle1 = sum . map decode
 
 decode :: String -> Int
 decode s =
@@ -44,8 +44,8 @@ pluck inj = foldMap $ \case
 
 -----
 
-part2 :: [String] -> Int
-part2 = sum . map (decode . bake)
+puzzle2 :: [String] -> Int
+puzzle2 = sum . map (decode . bake)
 
 bake :: String -> String
 bake =
