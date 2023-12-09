@@ -44,8 +44,8 @@ type P = P.Parsec Void String
 
 parse :: String -> Game
 parse =
-    \s -> case P.runParser game "stdin" s of
-        Left e  -> error $ show e
+    \s -> case P.runParser (game <* P.eof) "stdin" s of
+        Left e  -> error $ P.errorBundlePretty e
         Right g -> g
   where
     game :: P Game
