@@ -3,6 +3,7 @@
 module Main (main) where
 
 import qualified Day1
+import qualified Day2
 import           System.Environment (getArgs)
 import           Text.Read (readMaybe)
 
@@ -15,4 +16,5 @@ main = getArgs >>= \case
 doDay :: Int -> Maybe (IO ())
 doDay = \case
     1 -> Just Day1.main
+    2 -> Just Day2.main
     _ -> Nothing
