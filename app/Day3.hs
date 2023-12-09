@@ -2,16 +2,39 @@
 
 module Day3 (main) where
 
+import           Control.Arrow ((&&&))
 import           Data.Char (isDigit, ord)
 import qualified Data.Map as Map
 import qualified Data.Set as Set
 
 main :: IO ()
-main = interact (show . sum . partNumbers . parseSchematic . lines)
+main = interact (show . (puzzle1 &&& puzzle2) . parseSchematic . lines)
 
-partNumbers :: Schematic -> [Int]
-partNumbers (Schematic symbols digits) =
-  [ number
+puzzle1 :: Schematic -> Int
+puzzle1 schematic =
+    sum [ n | Part _ _ n _ <- parts schematic ]
+
+puzzle2 :: Schematic -> Int
+puzzle2 schematic =
+    sum $ map starSum (Set.toList stars)
+  where
+    Schematic _ stars _ = schematic
+
+    ps = parts schematic
+
+    starSum star =
+        case filter (entoothed star) ps of
+            [Part _ _ n1 _, Part _ _ n2 _] -> n1 * n2
+
+            _ -> 0
+
+    entoothed star (Part (RowNumber r) left _ right) =
+        flip any (interval left right) $ \(ColNumber c) ->
+            (== star) `any` neighbors (Coord r c)
+
+parts :: Schematic -> [Part]
+parts (Schematic symbols _stars digits) =
+  [ Part (RowNumber r) left number right
   | (RowNumber r, Candidate left number right) <- candidates
   , or
       [ (`Set.member` symbols) `any` neighbors (Coord r c)
@@ -42,21 +65,25 @@ pluck =
 data Candidate = Candidate ColNumber Int ColNumber
   deriving (Show)
 
------
-
-data Schematic = Schematic (Set.Set Coord) (Map.Map RowNumber (Map.Map ColNumber Int))
+data Part = Part RowNumber ColNumber Int ColNumber
   deriving (Show)
 
-instance Monoid Schematic where mempty = Schematic mempty mempty
+-----
+
+data Schematic = Schematic (Set.Set Coord) (Set.Set Coord) (Map.Map RowNumber (Map.Map ColNumber Int))
+  deriving (Show)
+
+instance Monoid Schematic where mempty = Schematic mempty mempty mempty
 
 instance Semigroup Schematic where
-    Schematic x1 x2 <> Schematic y1 y2 =
+    Schematic x1 x2 x3 <> Schematic y1 y2 y3 =
         Schematic
             (Set.union x1 y1)
+            (Set.union x2 y2)
             (   Map.unionWithKey
                     (\(RowNumber r) -> Map.unionWithKey (\(ColNumber c) -> collision (Coord r c)))
-                    x2
-                    y2
+                    x3
+                    y3
             )
       where
         collision :: (Show k, Show v) => k -> v -> v -> v
@@ -92,5 +119,6 @@ parseSchematic =
     row r   = zipWith (col r) [0..]
     col r c = \case
         '.' -> mempty
-        d | isDigit d -> Schematic mempty (Map.singleton (RowNumber r) (Map.singleton (ColNumber c) (ord d - ord '0')))
-        _             -> Schematic (Set.singleton (Coord r c)) mempty
+        d | isDigit d -> Schematic mempty mempty (Map.singleton (RowNumber r) (Map.singleton (ColNumber c) (ord d - ord '0')))
+        '*'           -> Schematic (Set.singleton (Coord r c)) (Set.singleton (Coord r c)) mempty
+        _             -> Schematic (Set.singleton (Coord r c)) mempty mempty
