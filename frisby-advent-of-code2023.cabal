@@ -25,6 +25,7 @@ executable frisby-advent-of-code2023
         Day2
         Day3
         Day4
+        Day5
 
     default-language: Haskell2010
     ghc-options:
