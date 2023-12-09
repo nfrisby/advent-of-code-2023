@@ -2,6 +2,7 @@
 
 module Day4 (main) where
 
+import           Control.Arrow ((&&&))
 import qualified Data.Set as Set
 import           Data.Void (Void)
 import qualified Text.Megaparsec as P
@@ -9,7 +10,10 @@ import qualified Text.Megaparsec.Char as P
 import qualified Text.Megaparsec.Char.Lexer as L
 
 main :: IO ()
-main = interact (show . sum . map (points . parse) . lines)
+main = interact (show . (puzzle1 &&& puzzle2) . map parse . lines)
+
+puzzle1 :: [Card] -> Int
+puzzle1 = sum . map points
 
 -----
 
@@ -37,8 +41,29 @@ parse =
         mine <- P.many $ L.decimal <* P.space
         pure $ Card ident winning mine
 
+matches :: Card -> Int
+matches (Card _ winning mine) =
+    length $ filter (`Set.member` Set.fromList winning) mine
+
 points :: Card -> Int
-points (Card _ winning mine) =
-    if 0 == wins then 0 else 2 ^ (wins - 1)
+points c =
+    if 0 == n then 0 else 2 ^ (n - 1)
   where
-    wins = length $ filter (`Set.member` Set.fromList winning) mine
+    n = matches c
+
+-----
+
+puzzle2 :: [Card] -> Int
+puzzle2 =
+    \cards -> go (length cards) cards
+  where
+    go n = \case
+        _ | 0 == n -> 0
+
+        []   -> 0
+        c:cs ->
+            let thisCard = 1
+                oldCards = go (n-1) cs
+                newCards = go (matches c) cs
+            in
+            thisCard + oldCards + newCards
