@@ -1,6 +1,6 @@
 {-# LANGUAGE LambdaCase #-}
 
-module Day3 (main) where
+module Day3 (main, Coord (..), neighbors) where
 
 import           Control.Arrow ((&&&))
 import           Data.Char (isDigit, ord)
