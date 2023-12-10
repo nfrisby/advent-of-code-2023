@@ -26,9 +26,21 @@ puzzle1 =
   . zipWith (\handRank (_h, bid) -> bid * handRank) [1 ..]
   . sortOn (\(h, _bid) -> (classify h, fmap value h))
 
-classify :: (Ord a, Show a) => Hand a -> HandType
+classify :: Hand Char -> HandType
 classify hand =
-    case sort (Map.elems m) of
+    case mbJ of
+        Nothing -> basic
+        Just n  -> joker n
+  where
+    Hand c1 c2 c3 c4 c5 = hand
+
+    mJ = Map.empty `f` c1 `f` c2 `f` c3 `f` c4 `f` c5
+
+    (mbJ, m) = Map.updateLookupWithKey (\_ _ -> Nothing) 'J' mJ
+
+    f x y = Map.insertWith (+) y (1 :: Int) x
+
+    basic = case sort (Map.elems m) of
         [1,1,1,1,1] -> HighCard
         [1,1,1,2]   -> One2
         [1,2,2]     -> Two2
@@ -36,16 +48,25 @@ classify hand =
         [2, 3]      -> FullHouse
         [1, 4]      -> One4
         [5]         -> One5
+
+        [1,1,1,1] -> One2
+        [1,1,2]   -> One2
+
         o           -> error $ "impossible! " <> show (hand, o)
-  where
-    Hand c1 c2 c3 c4 c5 = hand
 
-    m = Map.empty `f` c1 `f` c2 `f` c3 `f` c4 `f` c5
+    joker n = case sort (Map.elems m) of
+        []        -> One5
+        [_]       -> One5
+        [2,2]     -> FullHouse
+        [_,_]     -> One4
+        [_,_,_]   -> One3
+        [_,_,_,_] -> One2
 
-    f x y = Map.insertWith (+) y (1 :: Int) x
+        o           -> error $ "impossible! " <> show (hand, n, o)
 
 value :: Char -> Int
 value = \case
+    'J' -> 1
     '2' -> 2
     '3' -> 3
     '4' -> 4
@@ -55,7 +76,7 @@ value = \case
     '8' -> 8
     '9' -> 9
     'T' -> 10
-    'J' -> 11
+--    'J' -> 11
     'Q' -> 12
     'K' -> 13
     'A' -> 14
