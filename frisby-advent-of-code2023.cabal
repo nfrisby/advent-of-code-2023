@@ -37,6 +37,7 @@ executable frisby-advent-of-code2023
     build-depends:
       , base ^>=4.17.2.0
       , containers
+      , QuickCheck
       , megaparsec
     
     hs-source-dirs:   app
