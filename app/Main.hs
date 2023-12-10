@@ -10,6 +10,7 @@ import qualified Day5
 import qualified Day6
 import qualified Day7
 import qualified Day8
+import qualified Day9
 import           System.Environment (getArgs)
 import           Text.Read (readMaybe)
 
@@ -29,4 +30,5 @@ doDay = \case
     6 -> Just Day6.main
     7 -> Just Day7.main
     8 -> Just Day8.main
+    9 -> Just Day9.main
     _ -> Nothing
